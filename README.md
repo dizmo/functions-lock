@@ -4,7 +4,15 @@
 
 # @dizmo/functions-lock
 
-Module.
+Provides a `Lock` class, which can be used to acquire and release (enumerated) locks &ndash; where each lock can also be anonymous or named.
+
+Per lock an internal *identity context* is associated, where the corresponding data is stored as an (`ephemeral-id`, `session-id`) tuple. The `ephemeral-id` is stored in the `global` (aka the `window`) object, and the `session-id` in the `localStorage` &ndash; if available, otherwise again the `global` object is used.
+
+> Locks with the same name share the same identity, but each lock number is treated separately.
+
+A lock will *always* permit to be acquired, if the identity context is the same! However, this behaviour can be overridden by providing a flag to *clear* the internal identity (of a named lock), which will cause the lock to *not* be acquired &ndash; if another lock with the same name as already been acquired.
+
+Upon a successful acquisition a positive number (larger than `0`) will be returned, which indicates the amount of time (in milliseconds) it took to acquire the lock; a failure to acquire it will result in a `null` object. Upon a successful release a `true` value will be returned (else the result will be `false`).
 
 ## Usage
 
@@ -16,14 +24,102 @@ npm install @dizmo/functions-lock --save
 
 ### Require
 
-```javascript
-import '@dizmo/functions-lock';
+```typescript
+import { Lock } from '@dizmo/functions-lock';
 ```
 
 ### Example(s)
 
-```javascript
-...
+#### Acquire (once) and release anonymous lock
+```typescript
+const lock = new Lock();
+if (lock.acquire()) {
+    if (lock.release()) {
+        console.debug('lock acquired and released');
+    } else {
+        console.debug('lock acquired but *not* released');
+    }
+} else {
+    console.debug('lock *not* acquired');
+}
+```
+
+#### Acquire (once) and release anonymous lock at index=0 (default) plus *no* expiry (default)
+```typescript
+const lock = new Lock();
+if (lock.acquire(0)) {
+    if (lock.release(0)) {
+        console.debug('lock acquired and released');
+    } else {
+        console.debug('lock acquired but *not* released');
+    }
+} else {
+    console.debug('lock *not* acquired');
+}
+```
+
+#### Acquire (once) and release anonymous lock at index=0 (default) plus expiry of one minute
+```typescript
+const lock = new Lock(), expiry_ms = 60 * 1000; // one minute
+if (lock.acquire(0, expiry_ms)) {
+    if (lock.release(0)) {
+        console.debug('lock acquired and released');
+    } else {
+        console.debug('lock acquired but *not* released');
+    }
+} else {
+    console.debug('lock *not* acquired');
+}
+```
+
+#### Acquire (once) and release named lock at index=1
+```typescript
+const lock = new Lock('my-lock');
+if (lock.acquire(1)) {
+    if (lock.release(1)) {
+        console.debug('lock acquired and released');
+    } else {
+        console.debug('lock acquired but *not* released');
+    }
+} else {
+    console.debug('lock *not* acquired');
+}
+```
+
+#### Acquire (twice) and release named lock at index=2
+```typescript
+const lock = new Lock('my-lock');
+if (lock.acquire(0)) {
+    if (lock.acquire(0)) {
+        if (lock.release(0)) {
+            console.debug('named lock @index=2 acquired and released');
+        } else {
+            console.debug('named lock @index=2 acquired but *not* released');
+        }
+    } else {
+        console.debug('named lock @index=2 *not* acquired (2nd time)');
+    }
+} else {
+    console.debug('named lock @index=2 *not* acquired (1st time)');
+}
+```
+
+#### Acquire (twice) and release named lock at index=2 with ID clearing
+```typescript
+const lock = new Lock('my-lock', true); // clear ID i.e. "fake" another context!
+if (lock.acquire(2)) {
+    if (lock.acquire(2)) {
+        if (lock.release(2)) {
+            console.debug('named lock @index=2 acquired and released');
+        } else {
+            console.debug('named lock @index=2 acquired but *not* released');
+        }
+    } else {
+        console.debug('named lock @index=2 *not* acquired (2nd time)');
+    }
+} else {
+    console.debug('named lock @index=2 *not* acquired (1st time)');
+}
 ```
 
 ## Development

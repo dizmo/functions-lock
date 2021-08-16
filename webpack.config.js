@@ -9,5 +9,10 @@ module.exports = {
             use: ['source-map-loader'],
             enforce: 'pre'
         }]
+    },
+    resolve: {
+        fallback: {
+            'path': require.resolve('path-browserify')
+        }
     }
 };
