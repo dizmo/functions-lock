@@ -30,7 +30,7 @@ import { Lock } from '@dizmo/functions-lock';
 
 ### Example(s)
 
-#### Acquire (once) and release anonymous lock
+#### Acquire and release lock
 ```typescript
 const lock = new Lock();
 if (lock.acquire()) {
@@ -44,21 +44,21 @@ if (lock.acquire()) {
 }
 ```
 
-#### Acquire (once) and release anonymous lock at index=0 (default) plus *no* expiry (default)
+#### Acquire and release lock at index=0 (default) with no expiration (default)
 ```typescript
 const lock = new Lock();
 if (lock.acquire(0)) {
     if (lock.release(0)) {
-        console.debug('lock acquired and released');
+        console.debug('lock acquired @index=0 and released');
     } else {
-        console.debug('lock acquired but *not* released');
+        console.debug('lock acquired @index=0 but *not* released');
     }
 } else {
-    console.debug('lock *not* acquired');
+    console.debug('lock @index=0 *not* acquired');
 }
 ```
 
-#### Acquire (once) and release anonymous lock at index=0 (default) plus expiry of one minute
+#### Acquire and release lock at index=0 (default) with an expiration of one minute
 ```typescript
 const lock = new Lock(), expiry_ms = 60 * 1000; // one minute
 if (lock.acquire(0, expiry_ms)) {
@@ -72,26 +72,26 @@ if (lock.acquire(0, expiry_ms)) {
 }
 ```
 
-#### Acquire (once) and release named lock at index=1
+#### Acquire and release named lock at index=1
 ```typescript
 const lock = new Lock('my-lock');
 if (lock.acquire(1)) {
     if (lock.release(1)) {
-        console.debug('lock acquired and released');
+        console.debug('named lock @index=1 acquired and released');
     } else {
-        console.debug('lock acquired but *not* released');
+        console.debug('named lock @index=1 acquired but *not* released');
     }
 } else {
-    console.debug('lock *not* acquired');
+    console.debug('named lock @index=1 *not* acquired');
 }
 ```
 
 #### Acquire (twice) and release named lock at index=2
 ```typescript
 const lock = new Lock('my-lock');
-if (lock.acquire(0)) {
-    if (lock.acquire(0)) {
-        if (lock.release(0)) {
+if (lock.acquire(2)) {
+    if (lock.acquire(2)) {
+        if (lock.release(2)) {
             console.debug('named lock @index=2 acquired and released');
         } else {
             console.debug('named lock @index=2 acquired but *not* released');
