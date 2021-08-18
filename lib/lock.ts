@@ -158,9 +158,6 @@ export class Lock {
     protected getEphemeralPath(): string {
         return join(this.name, 'ephemeral-id');
     }
-    protected key(index: number): string {
-        return join(this._name, `${index}`);
-    }
     protected get name(): string {
         return this._name;
     }
