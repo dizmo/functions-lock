@@ -1,9 +1,7 @@
 /* eslint @typescript-eslint/no-explicit-any: [off] */
+import { random } from '@dizmo/functions-random';
 export type Global = Record<string, any>;
 declare const global: Global;
-
-import { random } from '@dizmo/functions-random';
-import { join } from 'path';
 
 export interface MasterId {
     now: string; eid: string; sid: string | null;
@@ -109,7 +107,7 @@ export class Lock {
         return await this.setMasterId(index, await this.newMasterId());
     }
     protected getMasterIdPath(index: number): string {
-        return join(this.name, 'master-id', `${index}`);
+        return `${this.name}/master-id/${index}`;
     }
     protected async newMasterId(): Promise<MasterId> {
         return {
@@ -143,7 +141,7 @@ export class Lock {
         return await this.setSessionId(random(8));
     }
     protected getSessionIdPath(): string {
-        return join(this.name, 'session-id');
+        return `${this.name}/session-id`;
     }
     protected async setEphemeralId(value: string): Promise<string> {
         return global[this.getEphemeralPath()] = value;
@@ -156,7 +154,7 @@ export class Lock {
         return await this.setEphemeralId(random(8));
     }
     protected getEphemeralPath(): string {
-        return join(this.name, 'ephemeral-id');
+        return `${this.name}/ephemeral-id`;
     }
     protected get name(): string {
         return this._name;

@@ -12,8 +12,7 @@
   ],
   "dependencies": {
     "@dizmo/functions-agent": "^1.0.0",
-    "@dizmo/functions-random": "^2.0.6",
-    "path-browserify": "^1.0.1"
+    "@dizmo/functions-random": "^2.0.6"
   },
   "description": "simple locking",
   "devDependencies": {
