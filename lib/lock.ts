@@ -7,7 +7,7 @@ export interface MasterId {
     now: string; eid: string; sid: string | null;
 }
 export interface MasterIdWrapped {
-    value: MasterId; nonce: string;
+    value: MasterId | null; nonce: string;
 }
 export interface Storage {
     set: <T>(key: string, value: T | null) => Promise<T | null>;
