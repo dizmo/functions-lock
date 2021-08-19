@@ -28,19 +28,18 @@ export class Lock {
                 } else {
                     global[key] = JSON.stringify(value);
                 }
-                const result = await this._storage.get<T>(key);
+                const result = await this.storage.get<T>(key);
                 return compare(result, value) ? value : null;
             },
             get: async <T>(key: string) => {
-                if (typeof localStorage !== 'undefined') {
-                    const result = localStorage.getItem(key);
-                    return typeof result === 'string'
-                        ? JSON.parse(result) as T : null;
-                } else {
-                    const result = global[key];
-                    return typeof result === 'string'
-                        ? JSON.parse(result) as T : null;
+                const result = typeof localStorage !== 'undefined'
+                    ? localStorage.getItem(key) : global[key];
+                if (typeof result === 'string') try {
+                    return JSON.parse(result) as T;
+                } catch (ex) {
+                    return result as any;
                 }
+                return null;
             },
             delete: async (key: string) => {
                 if (typeof localStorage !== 'undefined') {
@@ -88,7 +87,7 @@ export class Lock {
     protected async setMasterId(
         index: number, value: MasterId | null
     ): Promise<MasterId | null> {
-        const result = await this._storage.set(
+        const result = await this.storage.set(
             this.getMasterIdPath(index), {
                 value, nonce: random(8)
             }
@@ -98,7 +97,7 @@ export class Lock {
     protected async getMasterId(
         index: number, force = false
     ): Promise<MasterId | null> {
-        const wid = await this._storage.get<MasterIdWrapped>(
+        const wid = await this.storage.get<MasterIdWrapped>(
             this.getMasterIdPath(index)
         );
         if (typeof wid === 'object' && wid?.value && !force) {
