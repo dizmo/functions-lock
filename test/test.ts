@@ -1,5 +1,5 @@
 /* eslint @typescript-eslint/no-explicit-any: [off] */
-export type Global = Record<string, any>;
+import { Global } from '../lib/lock';
 declare const global: Global;
 
 import { Lock } from '../lib';
