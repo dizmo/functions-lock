@@ -3,18 +3,59 @@ import { random } from '@dizmo/functions-random';
 export type Global = Record<string, any>;
 declare const global: Global;
 
+/**
+ * Composite structure to manage identities
+ */
 export interface MasterId {
-    now: string; eid: string; sid: string | null;
+    /** timestamp regarding when the identity has been acquired */
+    now: string;
+    /** ephemeral identifier (stored in the `global` object) */
+    eid: string;
+    /** session identifier (stored by default in `localStorage`) */
+    sid: string | null;
 }
+/**
+ * Wrapper structure to manage identities
+ */
 export interface MasterIdWrapped {
-    value: MasterId | null; nonce: string;
+    /** master identifier */
+    value: MasterId | null;
+    /** random number */
+    nonce: string;
 }
+/**
+ * Interface for the storage layer
+ */
 export interface Storage {
+    /** setter function returning a promise for the provided value or `null` */
     set: <T>(key: string, value: T | null) => Promise<T | null>;
+    /** getter function returning a promise for the desired value or `null` */
     get: <T>(key: string) => Promise<T | null>;
+    /** optional delete function to remove the desired value */
     delete?: (key: string) => Promise<void>;
 }
+/**
+ * Class to acquire and release locks: Each instance manages a separate lock,
+ * unless they have the same (optional) `name`. Also, an (optional) `clear` flag
+ * can be used to clear an existing lock (by having its corresponding internal
+ * identity discarded).
+ *
+ * Further, an optional storage layer can be specified to persist the internal
+ * (composite) identity and state of the lock. By default, it is used to handle
+ * the session component of a master identitiy, where it requires the existence
+ * of `localStorage` (otherwise the `global` object is used).
+ */
 export class Lock {
+    /**
+     * Instantiates a new lock object to acquire and release locks.
+     *
+     * @param name
+     *  optional name to access the same lock across multiple instances
+     * @param clear
+     *  optional flag to suspend an (existing) identity
+     * @param storage
+     *  optional storage layer to handle persistence
+     */
     public constructor(
         name?: string | null, clear?: boolean, storage?: Storage
     ) {
@@ -58,11 +99,32 @@ export class Lock {
             delete global[this.getEphemeralPath()]; // clear id
         }
     }
+    /**
+     * Acquires a lock at an optional index, with an optional auto expiration
+     * time (in milleseconds).
+     *
+     * @param index
+     *  optional index to acquire lock at (defaults to `0`)
+     * @param expire
+     *  optional auto expiration time (in milliseconds)
+     * @returns
+     *  a promise for the duration (in milliseconds) it took to acquire the lock
+     */
     public async acquire(
         index = 0, expire?: number
     ): Promise<number | null> {
         return await this.lockAge(index, expire);
     }
+    /**
+     * Releases a lock at on optional index (by setting an internal master
+     * identity in the storage layer to `null`).
+     *
+     * @param index
+     *  optional index to release lock at (defaults to `0`)
+     * @returns
+     *  `true` if the internal master identitiy has indeed been cleared;
+     *  otherwise `false`
+     */
     public async release(index = 0): Promise<boolean> {
         return await this.setMasterId(index, null) === null;
     }
@@ -133,7 +195,9 @@ export class Lock {
         return await this.storage.set(this.getSessionIdPath(), value);
     }
     protected async getSessionId(): Promise<string | null> {
-        const id = await this.storage.get(this.getSessionIdPath());
+        const id = await this.storage.get<string | null>(
+            this.getSessionIdPath()
+        );
         if (typeof id === 'string' && id) {
             return id;
         }
