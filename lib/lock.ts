@@ -96,7 +96,7 @@ export class Lock {
             this._name = random(8);
         }
         if (clear) {
-            delete global[this.getEphemeralPath()]; // clear id
+            delete global[this.getEphemeralIdPath()]; // clear id
         }
     }
     /**
@@ -207,16 +207,16 @@ export class Lock {
         return `${this.name}/session-id`;
     }
     protected async setEphemeralId(value: string): Promise<string> {
-        return global[this.getEphemeralPath()] = value;
+        return global[this.getEphemeralIdPath()] = value;
     }
     protected async getEphemeralId(): Promise<string> {
-        const id = global[this.getEphemeralPath()];
+        const id = global[this.getEphemeralIdPath()];
         if (typeof id === 'string' && id) {
             return id;
         }
         return await this.setEphemeralId(random(8));
     }
-    protected getEphemeralPath(): string {
+    protected getEphemeralIdPath(): string {
         return `${this.name}/ephemeral-id`;
     }
     protected get name(): string {
